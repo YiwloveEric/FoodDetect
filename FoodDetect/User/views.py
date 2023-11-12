@@ -1,10 +1,9 @@
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.views import APIView
 
 
 from rest_framework.response import Response
-from .models import History, Favorites, Users
+from .models import  Users
 import os
 from rest_framework import serializers
 from Ingredient.models import Ingredient
