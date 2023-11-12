@@ -135,3 +135,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # 指定文件上传的路径
 MEDIA_ROOT = BASE_DIR / 'file/image'
 # 指定文件的url路径
+
+
+# 微信的appid
+APPID = "wx83139b5b5deb646d"
+# 微信的secret
+SECRET = "fdbbf522578bc05cba7d9846de99bf08"
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (  # 默认响应渲染类
+        'rest_framework.renderers.JSONRenderer',  # json渲染器，返回json数据
+        'rest_framework.renderers.BrowsableAPIRenderer',  # 浏览器API渲染器，返回调试界面
+    )
+}
