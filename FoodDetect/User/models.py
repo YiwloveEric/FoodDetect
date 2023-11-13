@@ -28,7 +28,7 @@ class History(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name="用户id")
     image = models.ImageField(default=None, verbose_name="图片url")
     # favorites = models.ForeignKey(Favorites, on_delete=models.CASCADE, verbose_name="收藏夹id", blank=True)
-    history_id = models.IntegerField(primary_key=True, verbose_name="收藏夹id")
+    history_id = models.AutoField(primary_key=True, verbose_name="收藏夹id")
     date = models.DateField(auto_now_add=True, verbose_name="历史记录的时间")
 
     class Meta:
