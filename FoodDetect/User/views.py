@@ -10,7 +10,10 @@ from FoodDetect.settings import APPID, SECRET, MEDIA_ROOT
 import json
 import uuid
 from Ingredient.serializers import IngredientSerializer, IngredientOcrSerializer
-from User.serializers import ReviewFavorViewSerializer
+from User.serializers import ReviewFavorViewSerializer, UsersSerializer
+import hashlib
+from django_redis import get_redis_connection
+import base64
 
 
 # Create your views here.
@@ -23,24 +26,26 @@ class OCRIngredient(APIView):
     def post(self, request):
         '''
         username
-        file1
+        imgBase64
         :param request:
         :return:
         '''
         # 获取用户信息
         username = request.data.get('username')
         user = Users.objects.filter(name=username).first()
-        if user is None:
-            return Response({'error': '您未注册，请先注册'},
-                            status=status.HTTP_400_BAD_REQUEST)
+        # if user is None:
+        #     return Response({'error': '您未注册，请先注册'},
+        #                     status=status.HTTP_400_BAD_REQUEST)
         # 获取图片
-        pic = request.data.get('file1')
+        pic = request.data.get('imgBase64')
         type = pic.content_type
-        if type not in ['image/jpg', 'image/png', 'image/jpeg']:
-            return Response({'error': '您上传的照片不支持，只支持jpg、png、jpeg格式的照片'},
-                            status=status.HTTP_400_BAD_REQUEST)
+        pic = base64.b64decode(pic)
+        # if type not in ['image/jpg', 'image/png', 'image/jpeg']:
+        #     return Response({'error': '您上传的照片不支持，只支持jpg、png、jpeg格式的照片'},
+        #                     status=status.HTTP_400_BAD_REQUEST)
 
-        file_extension = pic.name.split('.')[-1]
+        # file_extension = pic.name.split('.')[-1]
+        file_extension = "123123123"
         unique_filename = str(uuid.uuid4()) + '.' + file_extension
         # 构建目标文件夹路径
         target_folder = MEDIA_ROOT
@@ -84,6 +89,7 @@ class LoginView(APIView):
     '''
     这个view类是进行用户的注册登录
     '''
+    authentication_classes = []
 
     def post(self, request):
         '''
@@ -96,26 +102,34 @@ class LoginView(APIView):
         username = request.data.get('username')
         used = Users.objects.filter(name=username).first()
         # 校验姓名
-        if used:
-            return Response({'error': '名字已存在，请更改你的名字'}, status=status.HTTP_400_BAD_REQUEST)
+        # if used:
+        #     return Response({'error': '名字已存在，请更改你的名字'}, status=status.HTTP_400_BAD_REQUEST)
         js_code = request.data.get('js_code')
         appid = APPID
         secret = SECRET
         url = f"https://api.weixin.qq.com/sns/jscode2session?appid={appid}&secret={secret}&js_code={js_code}&grant_type=authorization_code"
-        res = requests.get(url).text
+        res = requests.get(url).content
         # 与微信API连接，获取openid与sessionKey
         response_data = json.loads(res)
-        try:
-            session_key = response_data["session_key"]
-            openid = response_data["openid"]
-            user = Users(name=username, openid=openid)
-            user.save()
-            return Response({
-                'username': username,
-                'session_key': session_key
-            })
-        except Exception as err:
-            return Response(response_data)
+        # 判断是否有错误码
+        if 'errcode' in response_data:
+            return Response(data={'code': response_data['errcode'], 'msg': response_data['errmsg']})
+        # 登录成功
+        openid = response_data['openid']
+        session_key = response_data['session_key']
+        # 保存openid,需要先判断数据库中有没有这个openid
+        user, created = Users.objects.get_or_create()
+
+        user_str = str(UsersSerializer(user).data)
+        # 生成自定义登录态，返回给前端
+        sha = hashlib.sha1()
+        sha.update(openid.encode())
+        sha.update(session_key.encode())
+        digest = sha.hexdigest()
+        # 将自定义登录态保存到缓存中, 两个小时过期
+        conn = get_redis_connection('default')
+        conn.set(digest, user_str, ex=2 * 60 * 60)
+        return Response(data={'code': 200, 'msg': 'ok', 'data': {'skey': digest}})
 
 
 class RegisFavorView(APIView):
