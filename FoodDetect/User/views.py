@@ -31,21 +31,21 @@ class OCRIngredient(APIView):
         :return:
         '''
         # 获取用户信息
-        username = request.data.get('username')
-        user = Users.objects.filter(name=username).first()
+        # username = request.data.get('username')
+        # user = Users.objects.filter(name=username).first()
         # if user is None:
-        #     return Response({'error': '您未注册，请先注册'},
-        #                     status=status.HTTP_400_BAD_REQUEST)
+        # return Response({'error': '您未注册，请先注册'},
+        # status=status.HTTP_400_BAD_REQUEST)
         # 获取图片
         pic = request.data.get('imgBase64')
-        type = pic.content_type
+        # type = pic.content_type
         pic = base64.b64decode(pic)
         # if type not in ['image/jpg', 'image/png', 'image/jpeg']:
         #     return Response({'error': '您上传的照片不支持，只支持jpg、png、jpeg格式的照片'},
         #                     status=status.HTTP_400_BAD_REQUEST)
 
         # file_extension = pic.name.split('.')[-1]
-        file_extension = "123123123"
+        file_extension = "jpg"
         unique_filename = str(uuid.uuid4()) + '.' + file_extension
         # 构建目标文件夹路径
         target_folder = MEDIA_ROOT
@@ -57,7 +57,7 @@ class OCRIngredient(APIView):
 
         # 保存文件
         with open(target_path, 'wb') as f:
-            f.write(pic.read())
+            f.write(pic)
         '''
         经过校验后存储图片，并将图片发送给ocr算法
         '''
@@ -80,16 +80,24 @@ class OCRIngredient(APIView):
         '''
         存储历史记录，同时数据库事件回滚等
         '''
-        his = History(user_id=user.user_id, image=imageUrl)
-        his.save()
+        # his = History(user_id=user.user_id, image=imageUrl)
+        # his.save()
         return Response(final_list)
 
+
+class ProLoginView(APIView):
+    import jwt
+    import datetime
+    from jwt import exceptions
+    def post(self,request):
+        user = request.data.get('')
 
 class LoginView(APIView):
     '''
     这个view类是进行用户的注册登录
     '''
-    authentication_classes = []
+
+    # authentication_classes = []
 
     def post(self, request):
         '''

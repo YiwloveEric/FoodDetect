@@ -138,19 +138,19 @@ APPID = "wx83139b5b5deb646d"
 SECRET = "fdbbf522578bc05cba7d9846de99bf08"
 
 REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': (  # 默认响应渲染类
-        'rest_framework.renderers.JSONRenderer',  # json渲染器，返回json数据
-        'rest_framework.renderers.BrowsableAPIRenderer',  # 浏览器API渲染器，返回调试界面
-    ),
+    # 'DEFAULT_RENDERER_CLASSES': (  # 默认响应渲染类
+    #     'rest_framework.renderers.JSONRenderer',  # json渲染器，返回json数据
+    #     'rest_framework.renderers.BrowsableAPIRenderer',  # 浏览器API渲染器，返回调试界面
+    # ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'User.authentication.UserAuthentication',
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_PARSER_CLASSES': (
-
-        'rest_framework.parsers.JSONParser',
-
-    ),
+    # 'DEFAULT_PARSER_CLASSES': (
+    #
+    #     'rest_framework.parsers.JSONParser',
+    #
+    # ),
 }
 
 # settings.py
